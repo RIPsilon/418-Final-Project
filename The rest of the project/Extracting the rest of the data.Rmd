@@ -1,0 +1,325 @@
+---
+title: "Extracting the Rest of the Data"
+author: "Anna Huynh"
+output: html_document
+---
+#Preliminary Code
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(rvest)
+library(magrittr)
+library(XML)
+
+get_info = function(link){
+  game = read_html(link)
+  game_title = game %>% html_nodes(".page-title") %>% html_text
+  a = game %>% html_nodes(".mygames_stats_own > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  number_owners = a[[1]][1] %>% as.numeric()
+  b = game %>% html_nodes(".mygames_stats_rate > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  rating = b[[1]][1] %>% as.numeric()
+  bb = game %>% html_nodes("#js_mygames_rate > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+  number_owners_rated = bb[[1]][1] %>% as.numeric()
+  difficulty = game %>% html_nodes(".mygames_stats_diff > a:nth-child(1)") %>% html_text()
+  cc = game %>% html_nodes("#js_mygames_diff > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+  percent_difficulty_votes = cc[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+  d = game %>% html_nodes(".mygames_stats_time > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  game_length = d[[1]][1] %>% as.numeric()
+  dd = game %>% html_nodes("#js_mygames_time > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+  votes_game_length = dd[[1]][1] %>% as.numeric()
+  e = game %>% html_nodes(".mygames_stats_play > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  number_completed_users = e[[1]][1] %>% as.numeric()
+  ee = game %>% html_nodes("#js_mygames_play > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+  completion_rate = ee[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+  return(data.frame(game_title, number_owners, rating, number_owners_rated, difficulty,
+                    percent_difficulty_votes, game_length, votes_game_length,
+                    number_completed_users, completion_rate))
+}
+```
+
+#SNES  
+```{r}
+snes0 = read_html("https://gamefaqs.gamespot.com/snes/category/48-role-playing?page=0&dist=1")
+snes_urls = numeric(0)
+urls = snes0 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/snes/", urls)]
+urls = gsub("/snes/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/snes/", urls)
+snes_urls[1:100] = urls
+snes1 = read_html("https://gamefaqs.gamespot.com/snes/category/48-role-playing?page=1&dist=1")
+urls = snes1 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/snes/", urls)]
+urls = gsub("/snes/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/snes/", urls)
+snes_urls[101:200] = urls
+snes2 = read_html("https://gamefaqs.gamespot.com/snes/category/48-role-playing?page=2&dist=1")
+urls = snes2 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/snes/", urls)]
+urls = gsub("/snes/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/snes/", urls)
+snes_urls[201:260] = urls
+snes_urls = unique(snes_urls)
+```
+
+#GBA
+```{r}
+gba0 = read_html("https://gamefaqs.gamespot.com/gba/category/48-role-playing?page=0&dist=1")
+gba_urls = numeric(0)
+urls = gba0 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[131:(length(urls) - 35)]
+urls = urls[grepl("/gba/", urls)]
+urls = gsub("/gba/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/gba/", urls)
+gba_urls[1:100] = urls
+gba1 = read_html("https://gamefaqs.gamespot.com/gba/category/48-role-playing?page=1&dist=1")
+urls = gba1 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[131:(length(urls) - 35)]
+urls = urls[grepl("/gba/", urls)]
+urls = gsub("/gba/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/gba/", urls)
+gba_urls[101:200] = urls
+gba2 = read_html("https://gamefaqs.gamespot.com/gba/category/48-role-playing?page=2&dist=1")
+urls = gba2 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[131:(length(urls) - 35)]
+urls = urls[grepl("/gba/", urls)]
+urls = gsub("/gba/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/gba/", urls)
+gba_urls[201:204] = urls
+gba_urls = unique(gba_urls)
+```
+
+#DS  
+```{r}
+ds0 = read_html("https://gamefaqs.gamespot.com/ds/category/48-role-playing?page=0&dist=1")
+ds_urls = numeric(0)
+urls = ds0 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[134:(length(urls) - 35)]
+urls = urls[grepl("/ds/", urls)]
+urls = gsub("/ds/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ds/", urls)
+ds_urls[1:100] = urls
+ds1 = read_html("https://gamefaqs.gamespot.com/ds/category/48-role-playing?page=1&dist=1")
+urls = ds1 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[134:(length(urls) - 35)]
+urls = urls[grepl("/ds/", urls)]
+urls = gsub("/ds/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ds/", urls)
+ds_urls[101:200] = urls
+ds2 = read_html("https://gamefaqs.gamespot.com/ds/category/48-role-playing?page=2&dist=1")
+urls = ds2 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[134:(length(urls) - 35)]
+urls = urls[grepl("/ds/", urls)]
+urls = gsub("/ds/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ds/", urls)
+ds_urls[201:300] = urls
+ds3 = read_html("https://gamefaqs.gamespot.com/ds/category/48-role-playing?page=3&dist=1")
+urls = ds3 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[134:(length(urls) - 35)]
+urls = urls[grepl("/ds/", urls)]
+urls = gsub("/ds/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ds/", urls)
+ds_urls[301:325] = urls
+ds_urls = unique(ds_urls)
+```
+
+#PSX  
+```{r}
+ps0 = read_html("https://gamefaqs.gamespot.com/ps/category/48-role-playing?page=0&dist=1")
+ps_urls = numeric(0)
+urls = ps0 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[132:(length(urls) - 35)]
+urls = urls[grepl("/ps/", urls)]
+urls = gsub("/ps/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps/", urls)
+ps_urls[1:100] = urls
+ps1 = read_html("https://gamefaqs.gamespot.com/ps/category/48-role-playing?page=1&dist=1")
+urls = ps1 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[132:(length(urls) - 35)]
+urls = urls[grepl("/ps/", urls)]
+urls = gsub("/ps/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps/", urls)
+ps_urls[101:200] = urls
+ps2 = read_html("https://gamefaqs.gamespot.com/ps/category/48-role-playing?page=2&dist=1")
+urls = ps2 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[132:(length(urls) - 35)]
+urls = urls[grepl("/ps/", urls)]
+urls = gsub("/ps/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps/", urls)
+ps_urls[201:300] = urls
+ps3 = read_html("https://gamefaqs.gamespot.com/ps/category/48-role-playing?page=3&dist=1")
+urls = ps3 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[132:(length(urls) - 35)]
+urls = urls[grepl("/ps/", urls)]
+urls = gsub("/ps/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps/", urls)
+ps_urls[301:312] = urls
+ps_urls = unique(ps_urls)
+```
+
+#PS2  
+```{r}
+ps20 = read_html("https://gamefaqs.gamespot.com/ps2/category/48-role-playing?page=0&dist=1")
+ps2_urls = numeric(0)
+urls = ps20 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[133:(length(urls) - 35)]
+urls = urls[grepl("/ps2/", urls)]
+urls = gsub("/ps2/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps2/", urls)
+ps2_urls[1:100] = urls
+ps21 = read_html("https://gamefaqs.gamespot.com/ps2/category/48-role-playing?page=1&dist=1")
+urls = ps21 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[133:(length(urls) - 35)]
+urls = urls[grepl("/ps2/", urls)]
+urls = gsub("/ps2/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps2/", urls)
+ps2_urls[101:200] = urls
+ps22 = read_html("https://gamefaqs.gamespot.com/ps2/category/48-role-playing?page=2&dist=1")
+urls = ps22 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[133:(length(urls) - 35)]
+urls = urls[grepl("/ps2/", urls)]
+urls = gsub("/ps2/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps2/", urls)
+ps2_urls[201:300] = urls
+ps23 = read_html("https://gamefaqs.gamespot.com/ps2/category/48-role-playing?page=3&dist=1")
+urls = ps23 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[133:(length(urls) - 35)]
+urls = urls[grepl("/ps2/", urls)]
+urls = gsub("/ps2/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps2/", urls)
+ps2_urls[301:342] = urls
+ps2_urls = unique(ps2_urls)
+```
+
+#PS3  
+```{r}
+ps30 = read_html("https://gamefaqs.gamespot.com/ps3/category/48-role-playing?page=0&dist=1")
+ps3_urls = numeric(0)
+urls = ps30 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[141:(length(urls) - 35)]
+urls = urls[grepl("/ps3/", urls)]
+urls = gsub("/ps3/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps3/", urls)
+ps3_urls[1:100] = urls
+ps31 = read_html("https://gamefaqs.gamespot.com/ps3/category/48-role-playing?page=1&dist=1")
+urls = ps31 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[141:(length(urls) - 35)]
+urls = urls[grepl("/ps3/", urls)]
+urls = gsub("/ps3/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps3/", urls)
+ps3_urls[101:200] = urls
+ps32 = read_html("https://gamefaqs.gamespot.com/ps3/category/48-role-playing?page=2&dist=1")
+urls = ps32 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[141:(length(urls) - 35)]
+urls = urls[grepl("/ps3/", urls)]
+urls = gsub("/ps3/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps3/", urls)
+ps3_urls[201:214] = urls
+ps3_urls = unique(ps3_urls)
+```
+
+#PS4  
+```{r}
+ps40 = read_html("https://gamefaqs.gamespot.com/ps4/category/48-role-playing?page=0&dist=1")
+ps4_urls = numeric(0)
+urls = ps40 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/ps4/", urls)]
+urls = gsub("/ps4/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps4/", urls)
+ps4_urls[1:100] = urls
+ps41 = read_html("https://gamefaqs.gamespot.com/ps4/category/48-role-playing?page=1&dist=1")
+urls = ps41 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/ps4/", urls)]
+urls = gsub("/ps4/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps4/", urls)
+ps4_urls[101:200] = urls
+ps42 = read_html("https://gamefaqs.gamespot.com/ps4/category/48-role-playing?page=2&dist=1")
+urls = ps42 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/ps4/", urls)]
+urls = gsub("/ps4/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps4/", urls)
+ps4_urls[201:300] = urls
+ps43 = read_html("https://gamefaqs.gamespot.com/ps4/category/48-role-playing?page=3&dist=1")
+urls = ps43 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[136:(length(urls) - 35)]
+urls = urls[grepl("/ps4/", urls)]
+urls = gsub("/ps4/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/ps4/", urls)
+ps4_urls[301:327] = urls
+ps4_urls = unique(ps4_urls)
+```
+
+#Stealing the rest of the data
+```{r}
+load("snes urls.rda")
+snes_418 = get_info(snes_urls[1])
+for(i in 2:length(snes_urls)){
+  trying = try(get_info(snes_urls[i]))
+  if(class(trying)=="try-error"){
+    print(i);
+    next } else { snes_418 = rbind(snes_418,trying) }
+  Sys.sleep(runif(n=1,60,90))
+}
+
+load("ds urls.rda")
+ds_418 = get_info(ds_urls[1])
+for(i in 2:length(ds_urls)){
+  trying = try(get_info(ds_urls[i]))
+  if(class(trying)=="try-error"){
+    print(i);
+    next } else { ds_418 = rbind(ds_418,trying) }
+  Sys.sleep(runif(n=1,60,90))
+}
+
+load("ps1 urls.rda")
+ps1_418 = get_info(psx_urls[1])
+for(i in 2:length(psx_urls)){
+  trying = try(get_info(psx_urls[i]))
+  if(class(trying)=="try-error"){
+    print(i);
+    next } else { ps1_418 = rbind(ps1_418,trying) }
+  Sys.sleep(runif(n=1,60,90))
+}
+
+load("ps2 urls.rda")
+ps2_418 = get_info(ps2_urls[1])
+for(i in 2:length(ps2_urls)){
+  trying = try(get_info(ps2_urls[i]))
+  if(class(trying)=="try-error"){
+    print(i);
+    next } else { ps2_418 = rbind(ps2_418,trying) }
+  Sys.sleep(runif(n=1,60,90))
+}
+```
+
