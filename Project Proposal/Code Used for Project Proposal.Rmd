@@ -1,0 +1,114 @@
+---
+title: "Code Used for Project Proposal"
+author: "Anna Huynh"
+output: html_document
+---
+#Libraries used  
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(rvest)
+library(magrittr)
+library(XML)
+library(ggplot2)
+```
+
+#Extracting data from an example game  
+```{r}
+topx = read_html("https://gamefaqs.gamespot.com/psp/991433-tales-of-phantasia-narikiri-dungeon-x")
+game_title = topx %>% html_nodes(".page-title") %>% html_text
+a = topx %>% html_nodes(".mygames_stats_own > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+number_owners = a[[1]][1] %>% as.numeric()
+b = topx %>% html_nodes(".mygames_stats_rate > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+rating = b[[1]][1] %>% as.numeric()
+bb = topx %>% html_nodes("#js_mygames_rate > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+number_owners_rated = bb[[1]][1] %>% as.numeric()
+difficulty = topx %>% html_nodes(".mygames_stats_diff > a:nth-child(1)") %>% html_text()
+cc = topx %>% html_nodes("#js_mygames_diff > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+percent_difficulty_votes = cc[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+d = topx %>% html_nodes(".mygames_stats_time > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+game_length = d[[1]][1] %>% as.numeric()
+dd = topx %>% html_nodes("#js_mygames_time > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+votes_game_length = dd[[1]][1] %>% as.numeric()
+e = topx %>% html_nodes(".mygames_stats_play > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+number_completed_users = e[[1]][1] %>% as.numeric()
+ee = topx %>% html_nodes("#js_mygames_play > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+completion_rate = ee[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+
+data.frame(game_title, number_owners, rating, number_owners_rated, difficulty, percent_difficulty_votes, game_length, votes_game_length, number_completed_users, completion_rate)
+```
+
+#Putting the code used to extract the data into a function  
+```{r}
+get_info = function(link){
+  game = read_html(link)
+  game_title = game %>% html_nodes(".page-title") %>% html_text
+  a = game %>% html_nodes(".mygames_stats_own > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  number_owners = a[[1]][1] %>% as.numeric()
+  b = game %>% html_nodes(".mygames_stats_rate > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  rating = b[[1]][1] %>% as.numeric()
+  bb = game %>% html_nodes("#js_mygames_rate > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+  number_owners_rated = bb[[1]][1] %>% as.numeric()
+  difficulty = game %>% html_nodes(".mygames_stats_diff > a:nth-child(1)") %>% html_text()
+  cc = game %>% html_nodes("#js_mygames_diff > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+  percent_difficulty_votes = cc[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+  d = game %>% html_nodes(".mygames_stats_time > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  game_length = d[[1]][1] %>% as.numeric()
+  dd = game %>% html_nodes("#js_mygames_time > div:nth-child(1) > div:nth-child(1) > p:nth-child(4)") %>% html_text() %>% strsplit(" ")
+  votes_game_length = dd[[1]][1] %>% as.numeric()
+  e = game %>% html_nodes(".mygames_stats_play > a:nth-child(1)") %>% html_text() %>% strsplit(" ")
+  number_completed_users = e[[1]][1] %>% as.numeric()
+  ee = game %>% html_nodes("#js_mygames_play > div:nth-child(1) > div:nth-child(1) > p:nth-child(3)") %>% html_text() %>% strsplit(" ")
+  completion_rate = ee[[1]][1] %>% str_extract("[1-9]+[.]?[1-9]+") %>% as.numeric()
+  return(data.frame(game_title, number_owners, rating, number_owners_rated, difficulty,
+                    percent_difficulty_votes, game_length, votes_game_length,
+                    number_completed_users, completion_rate))
+}
+```
+
+#Extracting data from all the PSP RPG's  
+```{r}
+psp0 = read_html("https://gamefaqs.gamespot.com/psp/category/48-role-playing?page=0&dist=1")
+all_urls = numeric(0)
+urls = psp0 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[139:(length(urls) - 35)]
+urls = urls[grepl("/psp/", urls)]
+urls = gsub("/psp/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/psp/", urls)
+all_urls[1:100] = urls
+psp1 = read_html("https://gamefaqs.gamespot.com/psp/category/48-role-playing?page=1&dist=1")
+urls = psp1 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[139:(length(urls) - 35)]
+urls = urls[grepl("/psp/", urls)]
+urls = gsub("/psp/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/psp/", urls)
+all_urls[101:200] = urls
+psp2 = read_html("https://gamefaqs.gamespot.com/psp/category/48-role-playing?page=2&dist=1")
+urls = psp2 %>% html_nodes("a") %>% html_attr("href")
+urls = urls[139:(length(urls) - 35)]
+urls = urls[grepl("/psp/", urls)]
+urls = gsub("/psp/", "", urls)
+urls = urls[!grepl("/", urls)]
+urls = paste0("https://gamefaqs.gamespot.com", "/psp/", urls)
+all_urls[201:248] = urls
+all_urls = unique(all_urls)
+
+psp_418 = get_info(all_urls[1])
+for(i in 2:length(all_urls)){
+  trying = try(get_info(all_urls[i]))
+  if(class(trying)=="try-error"){
+    print(i);
+    next } else { psp_418 = rbind(psp_418,trying) }
+  Sys.sleep(runif(n=1,60,90))
+}
+```
+
+#Light exploratory data analysis  
+```{r}
+hist(psp_418$game_length, xlab = "Game Length", main = "")
+hist(psp_418$completion_rate, xlab = "Completion Rate", main = "")
+sapply(table(psp_418$difficulty), function(x) x/170) %>% pie()
+```
