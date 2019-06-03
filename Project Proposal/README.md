@@ -6,7 +6,7 @@ Number of owners - number of GameFAQs users who claim to own the game.
 Rating - average rating, which is determined by GameFAQs users. The scale is out of 5.  
 Numbers of owners rated - number of GameFAQs users who claim to own the game and also gave said game a rating.  
 Difficulty - the difficulty of the game which is determined by a popular vote. The difficulty ratings are "Easy", "Easy-Just Right", "Just Right", "Just Right-Tough", "Tough", "Tough-Unforgiving" and "Unforgiving".  
-Percentage of difficulty ratings - obvious.  
+Percentage of difficulty ratings - percentage of votes that rated the game the listed difficulty.  
 Game length - average game length, which is determined by GameFAQs users. The unit is in hours.  
 Votes for game length - number of GameFAQs users who gave how long it took for them to beat the game.  
 Number of users who completed the game - obvious.  
