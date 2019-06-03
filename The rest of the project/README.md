@@ -10,4 +10,4 @@ Difficulty(numeric) - just converting the difficulty ratings to numerical values
 I made histograms of the rating, game length, and completion rate for each of the other systems.  
 
 # Trying K-means  
-I applied K-means clustering using rating, game length, and completion rate. I chose to have 4 clusters since there are 4 difficulty rates, but the number of clusters can vary. I then made a 3d scatter plot and looked at which games corresponded to the purple dots.  
+I applied K-means clustering using rating, game length, and completion rate. I chose to have 4 clusters since there are 4 difficulty rates, but the number of clusters can vary. I then made a 3d scatter plot and looked at which games corresponded to the group of dots in the top right corner.  
