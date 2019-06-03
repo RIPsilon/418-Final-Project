@@ -1,0 +1,72 @@
+---
+title: "Polishing up the data and trying K-Means"
+author: "Anna Huynh"
+output: html_document
+---
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(scatterplot3d)
+setwd("C:/Users/Anna/Documents/Classes/UCLA/418/Project")
+data = read.csv("data.csv")
+```
+
+#Cleaning the data
+```{r}
+see_nas = apply(data, 1, function(x) sum(is.na(x)))
+new_data = data[see_nas == 0, ]
+new_data$rating_rate = new_data$number_owners_rated/new_data$number_owners * 100
+diff_num = numeric(nrow(new_data))
+diff_num[new_data$difficulty == "Easy"] = 2
+diff_num[new_data$difficulty == "Easy-Just Right"] = 2.5
+diff_num[new_data$difficulty == "Just Right"] = 3
+diff_num[new_data$difficulty == "Just Right-Tough"] = 3.5
+diff_num[new_data$difficulty == "Tough"] = 4
+diff_num[new_data$difficulty == "Tough-Unforgiving"] = 4.5
+diff_num[new_data$difficulty == "Unforgiving"] = 5
+new_data$difficulty_numeric = diff_num
+```
+
+#More exploratory data analysis
+```{r}
+par(mfrow = c(1, 3))
+#overall
+hist(new_data$rating)
+hist(new_data$game_length)
+hist(new_data$completion_rate)
+#DS
+hist(new_data[new_data$system == "DS" , ]$rating)
+hist(new_data[new_data$system == "DS" , ]$game_length)
+hist(new_data[new_data$system == "DS" , ]$completion_rate)
+#SNES
+hist(new_data[new_data$system == "SNES" , ]$rating)
+hist(new_data[new_data$system == "SNES" , ]$game_length)
+hist(new_data[new_data$system == "SNES" , ]$completion_rate)
+#PSX
+hist(new_data[new_data$system == "PSX" , ]$rating)
+hist(new_data[new_data$system == "PSX" , ]$game_length)
+hist(new_data[new_data$system == "PSX" , ]$completion_rate)
+#PS2
+hist(new_data[new_data$system == "PS2" , ]$rating)
+hist(new_data[new_data$system == "PS2" , ]$game_length)
+hist(new_data[new_data$system == "PS2" , ]$completion_rate)
+
+par(mfrow = c(1, 1))
+```
+
+#Trying K-means
+```{r}
+vars = c("rating", "game_length", "completion_rate")
+kmeans_data = new_data[ , vars]
+fit_kmeans = kmeans(kmeans_data, centers = 4)
+fit_kmeans$cluster[fit_kmeans$cluster == 1] = "Red"
+fit_kmeans$cluster[fit_kmeans$cluster == 2] = "Blue"
+fit_kmeans$cluster[fit_kmeans$cluster == 3] = "Gold"
+fit_kmeans$cluster[fit_kmeans$cluster == 4] = "Purple"
+scatterplot3d(kmeans_data$game_length, kmeans_data$completion_rate, kmeans_data$rating, color = fit_kmeans$cluster, xlab = "Game Length", ylab = "Completion Rate", zlab = "Rating")
+
+data.frame(game_title = as.character(new_data$game_title)[fit_kmeans$cluster == "Purple"],
+           system = as.character(new_data$system)[fit_kmeans$cluster == "Purple"])
+```
+
